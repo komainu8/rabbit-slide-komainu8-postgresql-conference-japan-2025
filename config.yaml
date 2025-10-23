@@ -1,7 +1,7 @@
 ---
 id: postgresql-conference-japan-2025
 base_name: pgroonga-with-semantic-search
-tags: []
+tags: [rabbit, postgresql, groonga, fts]
 presentation_date:
 presentation_start_time:
 presentation_end_time:
@@ -15,7 +15,7 @@ width: 1920
 height: 1080
 source_code_uri:
 author:
-  markup_language: :markdown
+  markup_language: :rd
   name:
   email:
   rubygems_user:

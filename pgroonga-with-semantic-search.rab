@@ -1,0 +1,99 @@
+=  PostgreSQLでのセマンティックサーチへの挑戦
+
+: author
+   堀本 泰弘/阿部 智晃
+: institution
+   株式会社クリアコード
+: content-source
+   PostgreSQL Conference Japan 2025
+: date
+   2025-11-21
+: start-time
+   2025-11-21T16:20:00+09:00
+: end-time
+   2025-11-21T17:05:00+09:00
+: theme
+   .
+
+= 本日の内容
+
+  (1) キーワード検索の課題と改善の方向性
+  (2) セマンティックサーチを実現するために
+  (3) RaBitQを採用した理由
+  (4) PostgreSQLのセマンティクサーチ
+  (5) 性能
+  (6) 用例：FAQ検索・ナレッジベース検索の高度化
+
+= 本日の内容
+
+  (1) ((*キーワード検索の課題と改善の方向性*))
+  (2) セマンティックサーチを実現するために
+  (3) RaBitQを採用した理由
+  (4) PostgreSQLのセマンティクサーチ
+  (5) 性能
+  (6) 用例：FAQ検索・ナレッジベース検索の高度化
+
+= キーワード検索の課題
+
+  # image
+  # src = images/keyword-search-issue.png
+  # relative_height = 90
+
+= キーワード検索の課題
+
+  # image
+  # src = images/keyword-search-dic.png
+  # relative_height = 90
+
+= キーワード検索の課題
+
+  # image
+  # src = images/keyword-search-new-record.png
+  # relative_height = 90
+
+= キーワード検索の課題
+
+  # image
+  # src = images/keyword-search-dic-register.png
+  # relative_height = 90
+
+= キーワード検索の課題
+
+  # image
+  # src = images/keyword-search-new-dic.png
+  # relative_height = 90
+
+= セマンティックサーチの利点
+
+  # image
+  # src = images/semantic-search-advantage.png
+  # relative_height = 90
+
+= 2つの検索の併用
+
+  # RT
+  検索方法, メリット, デメリット
+  キーワード検索, 正確, 検索漏れ
+  セマンティックサーチ, 検索漏れは少ない, ノイズの増加
+
+= 2つの検索の併用
+
+併用することでより良い結果になる
+
+= 本日の内容
+
+  (1) キーワード検索の課題と改善の方向性
+  (2) ((*セマンティックサーチを実現するために*))
+  (3) RaBitQを採用した理由
+  (4) PostgreSQLのセマンティクサーチ
+  (5) 性能
+  (6) 用例：FAQ検索・ナレッジベース検索の高度化
+
+= 技術要素
+
+- テキスト->ベクトルデータへの変換
+- ベクトルデータの類似度の計算
+
+= ベクトルデータへの変換
+
+

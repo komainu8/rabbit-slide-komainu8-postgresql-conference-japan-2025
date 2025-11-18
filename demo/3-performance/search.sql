@@ -1,0 +1,15 @@
+-- Keyword search
+-- Keyword検索用のインデックスが使われているかを確認するためのEXPLAIN
+EXPLAIN ANALYZE
+SELECT title, content, pgroonga_score(tableoid, ctid)
+  FROM jpug_doc_contents
+ WHERE content &@~ pgroonga_condition('Window関数')
+ ORDER BY pgroonga_score(tableoid, ctid) DESC LIMIT 3;
+
+-- Semantic search
+-- セマンティックサーチ用のインデックスが使われているかを確認するためのEXPLAIN
+EXPLAIN ANALYZE
+SELECT title, content, pgroonga_score(tableoid, ctid)
+  FROM jpug_doc_contents
+ WHERE content &@* pgroonga_condition('Window関数')
+ ORDER BY pgroonga_score(tableoid, ctid) DESC LIMIT 3;

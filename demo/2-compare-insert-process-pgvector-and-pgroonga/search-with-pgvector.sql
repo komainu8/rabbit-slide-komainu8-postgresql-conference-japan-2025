@@ -1,7 +1,3 @@
-DROP INDEX IF EXISTS pgvector_content_index;
-CREATE INDEX pgvector_content_index ON contents_for_pgvector
- USING hnsw (content_embedding vector_ip_ops);
-
 SELECT contents_for_pgvector.content,
        (contents_for_pgvector.content_embedding <#> query_embedding.query) * -1 AS inner_product 
   FROM contents_for_pgvector,

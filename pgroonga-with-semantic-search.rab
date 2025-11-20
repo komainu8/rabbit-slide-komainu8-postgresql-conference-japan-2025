@@ -24,14 +24,14 @@ PostgreSQLで簡単に\nセマンティックサーチが使えることを\n実
 (1) キーワード検索とセマンティックサーチの比較
 (2) セマンティックサーチを実現するために
 (3) PostgreSQLでセマンティクサーチ
-(4) 性能とユースケース：FAQ検索
+(4) 性能とユースケース
 
 = 本日の内容
 
 (1) ((*キーワード検索とセマンティックサーチの比較*))
 (2) セマンティックサーチを実現するために
 (3) PostgreSQLでセマンティクサーチ
-(4) 性能とユースケース：FAQ検索
+(4) 性能とユースケース
 
 = キーワード検索の利点と課題
 
@@ -63,18 +63,38 @@ PostgreSQLで簡単に\nセマンティックサーチが使えることを\n実
   # image
   # src = images/semantic-search-advantage.png
 
-= 学習モデルの違い
+= 学習モデルの違いによる性能差
 
-実際に学習モデルを\n変えて結果を\n比較してみましょう！
+適切な学習モデル
 
-= デモ
+= 学習モデルの違いによる性能差
+
+ # coderay sql
+
+  SELECT title, pgroonga_score(tableoid, ctid)
+    FROM postgresql_faq_ja
+   WHERE title &@* pgroonga_condition('Window関数の使い方')
+   ORDER BY pgroonga_score(tableoid, ctid) DESC LIMIT 3;
+
+= 学習モデルの違いによる性能差
+
+不適切な学習モデルの場合
+
+= 学習モデルの違いによる性能差
+
+ # coderay sql
+
+  SELECT title, pgroonga_score(tableoid, ctid)
+    FROM postgresql_faq_ja
+   WHERE title &@* pgroonga_condition('Window関数の使い方')
+   ORDER BY pgroonga_score(tableoid, ctid) DESC LIMIT 3;
 
 = 本日の内容
 
 (1) キーワード検索とセマンティックサーチの比較
 (2) ((*セマンティックサーチを実現するために*))
 (3) PostgreSQLでセマンティクサーチ
-(4) 性能とユースケース：FAQ検索
+(4) 性能とユースケース
 
 = セマンティックサーチに必要な技術
 
@@ -183,7 +203,7 @@ PostgreSQLで簡単に\nセマンティックサーチが使えることを\n実
 (1) キーワード検索とセマンティックサーチの比較
 (2) セマンティックサーチを実現するために
 (3) ((*PostgreSQLでセマンティクサーチ*))
-(4) 性能とユースケース：FAQ検索
+(4) 性能とユースケース
 
 = PostgreSQLのセマンティクサーチ
 
@@ -214,32 +234,6 @@ PostgreSQLで簡単に\nセマンティックサーチが使えることを\n実
   # image
   # src = images/pgvector-insert.png
 
-= メリット
-
-* ベクトルデータへ変換するサービスは複数あるので、用途に合わせた組み合わせができる
-* ベクトルデータ変換と検索でリソースを分割できる
-* RaBitQというアルゴリズムを使って、データサイズを少なくできる
-
-= RaBitQとは？
-
-ベクトルデータの\n量子化手法の一つ
-
-= RaBitQを採用した理由
-
-(1) データ量を大幅に少なく出来る
-
-= データ量を大幅に少なく出来る
-
-各32bit浮動少数点数を1ビットで表現
-
-= データ量を大幅に少なく出来る
-
-単純にデータサイズは1/32になる
-
-= デメリット
-
-* 変換したベクトルデータをシステム間でやりとりする必要がある
-
 = pgvectorとPGroongaの違い
 
   # image
@@ -250,27 +244,156 @@ PostgreSQLで簡単に\nセマンティックサーチが使えることを\n実
   # image
   # src = images/convert-text-to-vector-with-pgroonga.png
 
-= メリット
+= pgvectorのメリット
+
+* ベクトルデータへ変換するサービスは複数あるので、用途に合わせた組み合わせができる
+* ベクトルデータ変換と検索でリソースを分割できる
+
+= pgvectorのデメリット
+
+* 変換したベクトルデータをシステム間でやりとりする必要がある
+
+= PGroongaのメリット
 
 * ベクトルデータをシステム間でやりとりする必要がない
+* RaBitQというアルゴリズムを使って、データサイズを少なくできる
 
-= デメリット
+= PGroongaのデメリット
 
 * ベクトルデータへの変換は固定的
 * ベクトルデータ変換と検索でリソースが同一
 
-= デモ
+= RaBitQとは？
 
-pgvectorとPGroongaでデータ登録と検索をやってみましょう！
+ベクトルデータの\n量子化手法の一つ
 
-= デモ
+= RaBitQを採用した理由
+
+データ量を大幅に\n少なく出来る
+
+= データ量を大幅に少なく出来る
+
+各32bit浮動少数点数を1ビットで表現
+
+= データ量を大幅に少なく出来る
+
+単純にデータサイズは1/32になる
+
+= pgvectorとPGroongaでデータ登録と検索
+
+= pgvectorのデータ登録と検索
+
+  # coderay sql
+
+  CREATE EXTENSION IF NOT EXISTS vector;
+
+  CREATE TABLE contents_for_pgvector (
+    content text,
+    content_embedding vector(384)
+  );
+
+= pgvectorのデータ登録と検索
+
+  # coderay sql
+
+  INSERT INTO contents_for_pgvector (content, content_embedding)
+         SELECT 'I am a boy', (pgroonga_language_model_vectorize(
+                                  'hf:///groonga/all-MiniLM-L6-v2-Q4_K_M-GGUF',
+                                  'I am a boy'));
+
+  INSERT INTO contents_for_pgvector (content, content_embedding)
+         SELECT 'I am a dog', (pgroonga_language_model_vectorize(
+                                  'hf:///groonga/all-MiniLM-L6-v2-Q4_K_M-GGUF',
+                                  'I am a dog'));
+
+  INSERT INTO contents_for_pgvector (content, content_embedding)
+         SELECT 'I am a king', (pgroonga_language_model_vectorize(
+                                  'hf:///groonga/all-MiniLM-L6-v2-Q4_K_M-GGUF',
+                                  'I am a king'));
+
+= pgvectorのデータ登録と検索
+
+  # coderay sql
+
+  SELECT * FROM contents_for_pgvector;
+  --  I am a boy  | [-0.05031514,0.10813845,...,-0.12843993]
+  --  I am a dog  | [-0.03515085,-0.0059523215,...,-0.024966048]
+  --  I am a king | [-0.030026972,0.057919234,...,-0.09476562]
+  -- (3 行)
+
+= pgvectorのデータ登録と検索
+
+  # coderay sql
+
+  SELECT contents_for_pgvector.content,
+         (contents_for_pgvector.content_embedding <#> query_embedding.query) * -1 AS inner_product 
+    FROM contents_for_pgvector,
+         (
+           SELECT CAST(pgroonga_language_model_vectorize(
+                          'hf:///groonga/all-MiniLM-L6-v2-Q4_K_M-GGUF',
+                          'boy') AS vector) AS query
+         ) query_embedding
+  ORDER BY inner_product DESC;
+  --    content   |   inner_product    
+  -- -------------+--------------------
+  --  I am a boy  | 0.5909400582313538
+  --  I am a dog  | 0.2753480076789856
+  --  I am a king | 0.1733587086200714
+  -- (3 行)
+
+= PGroongaのデータ登録と検索
+
+  # coderay sql
+
+  CREATE EXTENSION IF NOT EXISTS pgroonga;
+
+  CREATE TABLE contents_for_pgroonga (
+    content text
+  );
+
+= PGroongaのデータ登録と検索
+
+  # coderay sql
+
+  INSERT INTO contents_for_pgroonga VALUES ('I am a boy');
+  INSERT INTO contents_for_pgroonga VALUES ('I am a dog');
+  INSERT INTO contents_for_pgroonga VALUES ('I am a king');
+  SELECT * FROM contents_for_pgroonga;
+  --    content   
+  -- -------------
+  --  I am a boy
+  --  I am a dog
+  --  I am a king
+  -- (3 行)
+
+= PGroongaのデータ登録と検索
+
+  # coderay sql
+
+  SELECT content, pgroonga_score(tableoid, ctid)
+    FROM contents_for_pgroonga
+   WHERE content &@* pgroonga_condition('boy');
+  --    content   |   pgroonga_score   
+  -- -------------+--------------------
+  --  I am a boy  | 0.8671597838401794
+  --  I am a king | 0.5496522784233093
+  --  I am a dog  | 0.5450347065925598
+  -- (3 行)
+
+= PGroongaのデータ登録と検索
+
+  # coderay sql
+
+  -- [1,1,"I am a boy","mjctvB1JDj5pur67C/ ... ICPMFQi7wSL8q9"],
+  -- [2,2,"I am a dog","BwGXu4YNUj2Yi5k9j+ ... nDPPL4ijySlqy7"],
+  -- [3,3,"I am a king","1lklOxiXvj2rSB69VG ... tbvVHmDr1wSFK9"]
 
 = 本日の内容
 
 (1) キーワード検索とセマンティックサーチの比較
 (2) PostgreSQLでセマンティクサーチ
 (3) セマンティックサーチを実現するために
-(4) ((*性能とユースケース：FAQ検索*))
+(4) ((*性能とユースケース*))
 
 = 測定環境
 
@@ -295,8 +418,10 @@ pgvectorとPGroongaでデータ登録と検索をやってみましょう！
 
 検証用のクエリ:
 
+  # coderay sql
+
   SET enable_seqscan = off;
-  
+
   SELECT COUNT(title) FROM wikipedia
   ORDER BY title <&@*> pgroonga_condition('異世界転生して無双したよ')
   LIMIT 5;
@@ -305,8 +430,10 @@ pgvectorとPGroongaでデータ登録と検索をやってみましょう！
 
 検証用のクエリ:
 
+  # coderay sql
+
   SET enable_seqscan = off;
-  
+
   SELECT COUNT(title) FROM wikipedia
   ORDER BY embedding <-> '['異世界転生して無双したよ'のベクトル]'
   LIMIT 5;
@@ -323,71 +450,63 @@ pgvectorとPGroongaでデータ登録と検索をやってみましょう！
 
 ベクトルの生成は含まず。
 
-= ベクトルデータのサイズ
+= PGroongaのベクトルデータサイズ
 
-float4の384次元のベクトルデータは
-4バイト * 384 = 1,536バイト
-です。
+* float4の384次元のベクトルデータ:\n
+  4バイト * 384 = 1,536バイト
 
-PGroongaではそれを量子化して内部的に
-「iJDX5WFlJ7wwvR3kIWULq92iNpQddD7pYyTnrYNxKsF6g/az7H5mRZ7hIFb+sHiH0KxDv1PoHT8=」
-というコードで保持しています。
-64文字あるのでこれは64バイトです。
+= PGroongaのベクトルデータサイズ
 
-= インデックス作成時間
+* PGroongaではfloat4の384次元のベクトルデータを量子化
+* 「iJDX5WFlJ7wwvR ... +sHiH0KxDv1PoHT8=」という64バイトのバイナリーで保持
+* 64文字 = 64バイト
 
-PGroongaの場合インデックスの作成時間は「ベクトル化 + インデックスの作成時間」です。
-そして、ベクトル化がすごく遅いのですごく時間がかかります。
+= PGroongaのインデックス作成時間
 
-GPUの有無や、使う言語モデルによっても大きく変わります。
+* PGroongaの場合インデックスの作成時間は「ベクトル化 + インデックスの作成時間」
+* ベクトル化がすごく遅い
+* ただ、GPUの有無や、使う言語モデルによっても大きく速度が変わる
 
-= ユーズケース: PostgreSQLのドキュメントを検索する例
+= ユースケース:\nPostgreSQLのドキュメントを検索
 
-テーブルを消すクエリを検索することを考えます。
+テーブルを消す\nクエリを検索
+
+= キーワード検索：結果
+
+  # coderay sql
 
   SELECT title, SUBSTRING(content FROM 0 FOR 10)
   FROM jpug_doc_contents
   WHERE content LIKE '%テーブル%消す%'
   LIMIT 5;
+  --        title       |    substring
+  -- -------------------+------------------
+  --  contrib           | 付録F 追加で提供
+  --  ddl-priv          | 5.8. 権限
+  --  ddl-schemas       | 5.10. スキー
+  --  explicit-locking  | 13.3. 明示的
+  --  extend-extensions | 36.17. 関連
+  -- (5 rows)
 
-= PostgreSQLのドキュメントを検索する例: 結果
+= セマンティックサーチ：結果
 
-         title       |    substring
-  -------------------+------------------
-   contrib           | 付録F 追加で提供
-   ddl-priv          | 5.8. 権限       +
-                     |
-   ddl-schemas       | 5.10. スキー
-   explicit-locking  | 13.3. 明示的
-   extend-extensions | 36.17. 関連
-  (5 rows)
+PGroongaだと直接テキストで検索できる
 
-= PostgreSQLのドキュメントを検索する例: セマンティックサーチ
-
-PGroongaだと直接テキストで検索できます。
+  # coderay sql
 
   SELECT title, SUBSTRING(content FROM 0 FOR 10)
   FROM jpug_doc_contents
   ORDER BY content <&@*> pgroonga_condition('テーブルを消す')
   LIMIT 5;
-
-= セマンティックサーチ: 結果
-
-         title        |   substring
-  --------------------+---------------
-   tutorial-table     | 2.3. 新しいテ
-   ddl-basics         | 5.1. テーブル
-   ddl-alter          | 5.7. テーブル
-   sql-delete         | DELETEDEL
-   sql-droptablespace | DROP TABL
-  (5 rows)
-
-= デモ
-
-PostgreSQLの日本語ドキュメントを検索してみましょう！
-
-= デモ
+  --        title        |   substring
+  -- --------------------+---------------
+  --  tutorial-table     | 2.3. 新しいテ
+  --  ddl-basics         | 5.1. テーブル
+  --  ddl-alter          | 5.7. テーブル
+  --  sql-delete         | DELETEDEL
+  --  sql-droptablespace | DROP TABL
+  -- (5 rows)
 
 = まとめ
 
-PostgreSQLから簡単にセマンティックサーチを使える！
+PostgreSQLから簡単にセマンティックサーチを使えるようになりました！

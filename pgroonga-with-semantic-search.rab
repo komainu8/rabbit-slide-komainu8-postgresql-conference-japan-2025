@@ -63,32 +63,6 @@ PostgreSQLで簡単に\nセマンティックサーチが使えることを\n実
   # image
   # src = images/semantic-search-advantage.png
 
-= 学習モデルの違いによる性能差
-
-適切な学習モデル
-
-= 学習モデルの違いによる性能差
-
- # coderay sql
-
-  SELECT title, pgroonga_score(tableoid, ctid)
-    FROM postgresql_faq_ja
-   WHERE title &@* pgroonga_condition('Window関数の使い方')
-   ORDER BY pgroonga_score(tableoid, ctid) DESC LIMIT 3;
-
-= 学習モデルの違いによる性能差
-
-不適切な学習モデルの場合
-
-= 学習モデルの違いによる性能差
-
- # coderay sql
-
-  SELECT title, pgroonga_score(tableoid, ctid)
-    FROM postgresql_faq_ja
-   WHERE title &@* pgroonga_condition('Window関数の使い方')
-   ORDER BY pgroonga_score(tableoid, ctid) DESC LIMIT 3;
-
 = 本日の内容
 
 (1) キーワード検索とセマンティックサーチの\n比較
@@ -382,6 +356,8 @@ PostgreSQLで簡単に\nセマンティックサーチが使えることを\n実
 
 = PGroongaのデータ登録と検索
 
+PGroongaが内部で保持している\nベクトルデータ
+
   # coderay sql
 
   -- [1,1,"I am a boy","mjctvB1JDj5pur67C/ ... ICPMFQi7wSL8q9"],
@@ -442,13 +418,13 @@ PostgreSQLで簡単に\nセマンティックサーチが使えることを\n実
 
 5回実行した中央値: 108.868 ms
 
-ベクトルの生成も含む。
+ベクトルの生成も含む
 
 = 検索速度: 結果: pgvector
 
 5回実行した中央値: 12.166 ms
 
-ベクトルの生成は含まず。
+ベクトルの生成は含まず
 
 = PGroongaのベクトルデータサイズ
 

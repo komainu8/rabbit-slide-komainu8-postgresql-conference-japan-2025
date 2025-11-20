@@ -274,15 +274,113 @@ pgvectorとPGroongaでデータ登録と検索をやってみましょう！
 
 = 測定環境
 
-* ...
+* GPUなし
+* PostgreSQL 18
+* PGroonga mainブランチ
+* pgvector v0.8.1
+  * IVFFlatインデックス
+
+= 測定に使ったデータ
+
+* Wikipediaのタイトル
+  * 1,477,194 件
 
 = 測定項目
 
 * 検索速度
+* ベクトルデータのサイズ
+* インデックス作成時間
 
-= 測定結果
+= 検索速度: PGroonga
 
-* ...
+検証用のクエリ:
+
+  SET enable_seqscan = off;
+  
+  SELECT COUNT(title) FROM wikipedia
+  ORDER BY title <&@*> pgroonga_condition('異世界転生して無双したよ')
+  LIMIT 5;
+
+= 検索速度: pgvector
+
+検証用のクエリ:
+
+  SET enable_seqscan = off;
+  
+  SELECT COUNT(title) FROM wikipedia
+  ORDER BY embedding <-> '['異世界転生して無双したよ'のベクトル]'
+  LIMIT 5;
+
+= 検索速度: 結果: PGroonga
+
+5回実行した中央値: 108.868 ms
+
+ベクトルの生成も含む。
+
+= 検索速度: 結果: pgvector
+
+5回実行した中央値: 12.166 ms
+
+ベクトルの生成は含まず。
+
+= ベクトルデータのサイズ
+
+float4の384次元のベクトルデータは
+4バイト * 384 = 1,536バイト
+です。
+
+PGroongaではそれを量子化して内部的に
+「iJDX5WFlJ7wwvR3kIWULq92iNpQddD7pYyTnrYNxKsF6g/az7H5mRZ7hIFb+sHiH0KxDv1PoHT8=」
+というコードで保持しています。
+64文字あるのでこれは64バイトです。
+
+= インデックス作成時間
+
+PGroongaの場合インデックスの作成時間は「ベクトル化 + インデックスの作成時間」です。
+そして、ベクトル化がすごく遅いのですごく時間がかかります。
+
+GPUの有無や、使う言語モデルによっても大きく変わります。
+
+= ユーズケース: PostgreSQLのドキュメントを検索する例
+
+テーブルを消すクエリを検索することを考えます。
+
+  SELECT title, SUBSTRING(content FROM 0 FOR 10)
+  FROM jpug_doc_contents
+  WHERE content LIKE '%テーブル%消す%'
+  LIMIT 5;
+
+= PostgreSQLのドキュメントを検索する例: 結果
+
+         title       |    substring
+  -------------------+------------------
+   contrib           | 付録F 追加で提供
+   ddl-priv          | 5.8. 権限       +
+                     |
+   ddl-schemas       | 5.10. スキー
+   explicit-locking  | 13.3. 明示的
+   extend-extensions | 36.17. 関連
+  (5 rows)
+
+= PostgreSQLのドキュメントを検索する例: セマンティックサーチ
+
+PGroongaだと直接テキストで検索できます。
+
+  SELECT title, SUBSTRING(content FROM 0 FOR 10)
+  FROM jpug_doc_contents
+  ORDER BY content <&@*> pgroonga_condition('テーブルを消す')
+  LIMIT 5;
+
+= セマンティックサーチ: 結果
+
+         title        |   substring
+  --------------------+---------------
+   tutorial-table     | 2.3. 新しいテ
+   ddl-basics         | 5.1. テーブル
+   ddl-alter          | 5.7. テーブル
+   sql-delete         | DELETEDEL
+   sql-droptablespace | DROP TABL
+  (5 rows)
 
 = デモ
 

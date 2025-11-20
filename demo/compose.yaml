@@ -1,0 +1,23 @@
+services:
+  db:
+    build:
+      context: ./
+    volumes:
+      - ./:/demo
+    environment:
+      POSTGRES_DB: pgroonga
+      POSTGRES_USER: pgroonga
+      POSTGRES_PASSWORD: pgroonga
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    ports:
+      - 8080:80
+    volumes:
+      - ./pgAdmin/servers.json:/pgadmin4/servers.json
+    environment:
+      PGADMIN_DEFAULT_EMAIL: horimoto@clear-code.com
+      PGADMIN_DEFAULT_PASSWORD: pgroonga
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+    depends_on:
+      - db

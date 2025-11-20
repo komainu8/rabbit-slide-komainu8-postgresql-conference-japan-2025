@@ -32,6 +32,13 @@ docker compose exec db bash -c \
   'psql -Upgroonga -dsemantic_search_test < /demo/2-compare-insert-process-pgvector-and-pgroonga/insert-with-pgvector.sql'
 ```
 
+```bash
+docker compose exec db bash -c \
+  'psql -Upgroonga -dsemantic_search_test < /demo/5-shops/create-database.sql'
+docker compose exec db bash -c \
+  'psql -Upgroonga -dsemantic_search_test < /demo/5-shops/insert.sql'
+```
+
 ## pgAdmin
 
 Please access http://localhost:8080
@@ -44,6 +51,7 @@ Please access http://localhost:8080
 * 1-compare-keyword-search-and-semantic-search/search-query/count.sql
 * 2-compare-insert-process-pgvector-and-pgroonga/search-with-pgroonga.sql
 * 2-compare-insert-process-pgvector-and-pgroonga/search-with-pgvector.sql
+* 5-shops/search.sql
 
 ## Stop
 

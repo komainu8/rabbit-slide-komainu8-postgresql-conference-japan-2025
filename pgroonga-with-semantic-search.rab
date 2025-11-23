@@ -315,6 +315,16 @@ PostgreSQLで簡単に\nセマンティックサーチが使えることを\n実
   --  I am a king | 0.1733587086200714
   -- (3 行)
 
+= PGroongaのインデックス登録
+
+  # coderay sql
+
+  DROP INDEX IF EXISTS pgroonga_content_semantic_search_index;
+  CREATE INDEX pgroonga_content_semantic_search_index ON contents_for_pgroonga
+   USING pgroonga (content pgroonga_text_semantic_search_ops_v2)
+   WITH (plugins = 'language_model/knn',
+         model = 'hf:///groonga/multilingual-e5-large-Q4_K_M-GGUF');
+
 = PGroongaのデータ登録と検索
 
   # coderay sql
@@ -426,7 +436,7 @@ PGroongaが内部で保持している\nベクトルデータ
 
 ベクトルの生成は含まず
 
-= PGroongaのベクトルデータサイズ
+= ベクトルデータサイズ
 
 * float4の384次元のベクトルデータ:\n
   4バイト * 384 = 1,536バイト

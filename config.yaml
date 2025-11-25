@@ -3,8 +3,8 @@ id: postgresql-conference-japan-2025
 base_name: pgroonga-with-semantic-search
 tags: [rabbit, postgresql, groonga, pgroonga, pgcon25j, fts]
 presentation_date: 2025-11-21
-presentation_start_time: 2025-11-21T16:20:00+09:00
-presentation_end_time: 2025-11-21T17:10:00+09:00
+presentation_start_time:
+presentation_end_time:
 version: 1.0.1
 licenses: [CC-BY-SA-4.0, CC-BY-3.0, The PostgreSQL Licence]
 slideshare_id:

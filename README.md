@@ -19,6 +19,12 @@ CC BY 3.0
 
 原著作者：Groongaプロジェクト
 
+### PostgreSQL 日本語マニュアルのデータ
+
+The PostgreSQL Licence
+
+原著作者：PostgreSQL Global Development Group/The Regents of the University of California
+
 ## 作者向け
 
 ### 表示

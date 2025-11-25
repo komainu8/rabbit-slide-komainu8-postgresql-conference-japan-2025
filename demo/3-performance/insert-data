@@ -1,1 +1,0 @@
-/tmp/local/bin/psql -d semantic_search_performance < wikipedia-search/data/sql/ja-all-pages.sql

@@ -13,6 +13,8 @@ INSERT INTO contents_for_pgvector (content, content_embedding)
                                 'hf:///groonga/all-MiniLM-L6-v2-Q4_K_M-GGUF',
                                 'I am a king'));
 
-DROP INDEX IF EXISTS pgvector_content_index;
-CREATE INDEX pgvector_content_index ON contents_for_pgvector
- USING hnsw (content_embedding vector_ip_ops);
+SELECT * FROM contents_for_pgvector;
+--  I am a boy  | [-0.05031514,0.10813845,...,-0.12843993]
+--  I am a dog  | [-0.03515085,-0.0059523215,...,-0.024966048]
+--  I am a king | [-0.030026972,0.057919234,...,-0.09476562]
+-- (3 行)

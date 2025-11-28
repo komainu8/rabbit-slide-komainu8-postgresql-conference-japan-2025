@@ -5,7 +5,7 @@ tags: [rabbit, postgresql, groonga, pgroonga, pgcon25j, fts]
 presentation_date: 2025-11-21
 presentation_start_time:
 presentation_end_time:
-version: 1.0.1
+version: 1.0.2
 licenses: [CC-BY-SA-4.0, CC-BY-3.0, The PostgreSQL Licence]
 slideshare_id:
 speaker_deck_id:
